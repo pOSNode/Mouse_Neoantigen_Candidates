@@ -45,8 +45,8 @@ FastQ → FastQC + Trimmomatic → STAR (or NVIDIA Parabricks)
 
 ```bash
 # 1. Clone
-git clone https://github.com/pOSNode/rna-neoantigen-pipeline.git
-cd rna-neoantigen-pipeline
+git clone https://github.com/pOSNode/Mouse_Neoantigen_Candidates.git
+cd Mouse_Neoantigen_Candidates
 
 # 2. Run test profile (uses bundled chr19 test data)
 nextflow run main.nf -profile test,docker
@@ -155,7 +155,7 @@ results/
 
 If you use this pipeline, please cite:
 
-> Siddiqi O. (2024). *RNA-Seq Neoantigen Discovery Pipeline* (v1.0.0). GitHub. https://github.com/pOSNode/rna-neoantigen-pipeline
+> Siddiqi O. (2024). *RNA-Seq Neoantigen Discovery Pipeline* (v1.0.0). GitHub. https://github.com/pOSNode/Mouse_Neoantigen_Candidates
 > ORCID: 0009-0006-4754-8200
 
 ---
