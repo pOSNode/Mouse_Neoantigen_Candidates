@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# NetMHCpan-4.1 Docker image
+#
+# LICENCE REQUIREMENT:
+#   NetMHCpan-4.1 is free for academic, non-commercial use only.
+#   The binary is NOT redistributable and is NOT included in this repository.
+#   Do NOT push this image to a public registry (Docker Hub, GHCR, etc.) —
+#   doing so would violate the DTU Health Tech licence terms.
+#
+#   To build this image:
+#     1. Register and download the Linux binary from:
+#          https://services.healthtech.dtu.dk/services/NetMHCpan-4.1/
+#     2. Place the tarball at: docker/netMHCpan-4.1b.Linux.tar.gz
+#     3. Run the build command below.
+#
+# Build:
+#   docker build -f docker/Dockerfile.netmhcpan \
+#                -t owais/netmhcpan:4.1 .
+# ─────────────────────────────────────────────────────────────────────────────
+FROM python:3.11-slim
+
+LABEL maintainer="Owais Siddiqi"
+LABEL description="NetMHCpan-4.1 + RNA-Seq neoantigen scoring scripts"
+LABEL version="1.0.0"
+
+WORKDIR /opt
+
+# System dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        tcsh \
+        curl \
+        tabix \
+        && rm -rf /var/lib/apt/lists/*
+
+# Python dependencies
+COPY docker/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# NetMHCpan binary (must be pre-downloaded — see licence note above)
+COPY docker/netMHCpan-4.1b.Linux.tar.gz /tmp/
+RUN tar -xzf /tmp/netMHCpan-4.1b.Linux.tar.gz -C /opt/ \
+    && rm /tmp/netMHCpan-4.1b.Linux.tar.gz \
+    && ln -s /opt/netMHCpan-4.1/netMHCpan /usr/local/bin/netMHCpan \
+    && chmod +x /opt/netMHCpan-4.1/netMHCpan
+
+# Set NMHOME required by NetMHCpan
+ENV NMHOME=/opt/netMHCpan-4.1
+
+# Copy pipeline scripts
+COPY scripts/ /opt/scripts/
+ENV PATH="/opt/scripts:${PATH}"
+
+# Non-root user
+RUN useradd --create-home --shell /bin/bash pipeline
+USER pipeline
+
+CMD ["/bin/bash"]
